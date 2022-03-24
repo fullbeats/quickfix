@@ -28,6 +28,56 @@
 #include <algorithm>
 #include <iostream>
 
+#include <random>
+#include <sstream>
+
+#include <ctime>
+#include <chrono>
+#include <cstdint>
+
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
+
+#include <string>
+#include <string_view>
+#include <array>
+
+
+namespace uuid {
+    static std::random_device              rd;
+    static std::mt19937                    gen(rd());
+    static std::uniform_int_distribution<> dis(0, 15);
+    static std::uniform_int_distribution<> dis2(8, 11);
+
+    std::string generate_uuid_v4() {
+        std::stringstream ss;
+        int i;
+        ss << std::hex;
+        for (i = 0; i < 8; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        for (i = 0; i < 4; i++) {
+            ss << dis(gen);
+        }
+        ss << "-4";
+        for (i = 0; i < 3; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        ss << dis2(gen);
+        for (i = 0; i < 3; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        for (i = 0; i < 12; i++) {
+            ss << dis(gen);
+        };
+        return ss.str();
+    }
+}
+
 namespace FIX
 {
 Session::Sessions Session::s_sessions;
@@ -140,7 +190,8 @@ void Session::next( const UtcTimeStamp& timeStamp )
       if ( m_state.shouldSendLogon() && isLogonTime(timeStamp) )
       {
         generateLogon();
-        m_state.onEvent( "Initiated logon request" );
+        // std::string tmp = Session::getBittrexPwd("asdfdf"); 
+        m_state.onEvent( "Initiated logon request");
       }
       else if ( m_state.alreadySentLogon() && m_state.logonTimedOut() )
       {
@@ -662,6 +713,78 @@ EXCEPT ( IOException )
   m_state.incrNextSenderMsgSeqNum();
 }
 
+
+uint64_t timeSinceEpochMillisec() {
+  using namespace std::chrono;
+  return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+
+
+
+unsigned char *mx_hmac_sha512(const void *key, int keylen,
+                              const unsigned char *data, int datalen,
+                              unsigned char *result, unsigned int *resultlen) {
+    return HMAC(EVP_sha512(), key, keylen, data, datalen, result, resultlen);
+}
+
+
+std::string b2a_hex(const std::uint8_t* p, std::size_t n) {
+    static const char hex[] = "0123456789abcdef";
+    std::string res;
+    res.reserve(n * 2);
+
+    for (auto end = p + n; p != end; ++p) {
+        const std::uint8_t v = (*p);
+        res += hex[(v >> 4) & 0x0F];
+        res += hex[v & 0x0F];
+    }
+
+    return res;
+}
+
+std::string hmac_sha512(const char* key, std::size_t klen, const char* data, std::size_t dlen) {
+    std::uint8_t digest[EVP_MAX_MD_SIZE];
+    std::uint32_t dilen{};
+
+    auto p = ::HMAC(
+        ::EVP_sha512()
+        , key
+        , klen
+        , (std::uint8_t*)data
+        , dlen
+        , digest
+        , &dilen
+    );
+    assert(p);
+
+    return b2a_hex(digest, dilen);
+}
+
+std::string Session::getBittrexPwd(const std::string secret) {
+  std::string uuid1 = uuid::generate_uuid_v4();
+  std::string uuid2 = uuid::generate_uuid_v4();
+  
+  std::string content = std::to_string(timeSinceEpochMillisec()) + "_" + uuid1 + uuid2; // "1623908078830_85cafb57-1991-437e-918d-3db9014c262dd3155878-19d7-43f7-aeb4-a857f17243e6"; // uuid1 + uuid2 + "_" + std::to_string(timeSinceEpochMillisec());
+  
+  const char * key = strdup(secret.c_str());  // Documentation-Testsecret: ("3f7e973fe93441ca9679254bb2cf2fd0");//
+  int keylen = strlen(key);
+  // const unsigned char *data = (const unsigned char *)strdup(&content[0]); // convert string to unsigned char array by referencing the address of first char of the string
+  const char * data = (const char *)strdup(&content[0]); // convert string to unsigned char array by referencing the address of first char of the string
+  int datalen = strlen((char *)data);
+  unsigned char *result = NULL;
+  unsigned int resultlen = NULL;
+  // unsigned char *signed_content = mx_hmac_sha512((const void *)key, keylen, data, datalen, result, &resultlen);
+  // std::string signed_content_str(reinterpret_cast<char*>(signed_content)); // convert to string
+  std::string signed_content_str = hmac_sha512(key, keylen, data, datalen);
+
+  std::transform(signed_content_str.begin(), signed_content_str.end(), signed_content_str.begin(), ::toupper); // toUpper()
+  std::string password = content + "_" + signed_content_str;
+  // std::cout << password;
+  return password;
+}
+
+
 void Session::generateLogon()
 {
   SmartPtr<Message> pMsg(newMessage("A"));
@@ -678,6 +801,10 @@ void Session::generateLogon()
     m_state.reset();
   if( shouldSendReset() )
     logon.setField( ResetSeqNumFlag(true) );
+
+  std::string pwd = getBittrexPwd("APISECRET_TODO");
+  // std::cout << pwd;
+  logon.setField(Password(pwd));
 
   fill( logon.getHeader() );
   UtcTimeStamp now;

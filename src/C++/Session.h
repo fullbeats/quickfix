@@ -251,6 +251,8 @@ private:
   bool sendRaw( Message&, int msgSeqNum = 0 );
   bool resend( Message& message );
   void persist( const Message&, const std::string& ) EXCEPT ( IOException );
+  std::string getBittrexPwd( const std::string );
+
 
   void insertSendingTime( Header& );
   void insertOrigSendingTime( Header&,

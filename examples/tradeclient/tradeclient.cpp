@@ -40,13 +40,13 @@
 
 int main( int argc, char** argv )
 {
+  std::string file;
   if ( argc < 2 )
   {
-    std::cout << "usage: " << argv[ 0 ]
-    << " FILE." << std::endl;
-    return 0;
-  }
-  std::string file = argv[ 1 ];
+    file = "tradeclient.cfg";
+  } else {
+  file = argv[ 1 ];
+  };
 
 #ifdef HAVE_SSL
   std::string isSSL;
@@ -77,7 +77,7 @@ int main( int argc, char** argv )
     application.run();
     initiator->stop();
     delete initiator;
-
+    std::cout << "Run finished.";
     return 0;
   }
   catch ( std::exception & e )

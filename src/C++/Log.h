@@ -31,6 +31,8 @@
 #include "SessionSettings.h"
 #include <map>
 #include <vector>
+#include <algorithm>
+#include <string>
 
 namespace FIX
 {
@@ -143,10 +145,12 @@ public:
     if ( !m_outgoing ) return ;
     Locker l( s_mutex );
     m_time.setCurrent();
+    std::string s = value;
+    std::replace( s.begin(), s.end(), '\001', '|');
     std::cout << "<" << UtcTimeStampConvertor::convert(m_time, 9)
               << ", " << m_prefix
               << ", " << "outgoing>" << std::endl
-              << "  (" << value << ")" << std::endl;
+              << "  (" << s << ")" << std::endl;
   }
 
   void onEvent( const std::string& value )
