@@ -1,2 +1,2 @@
 #!/bin/sh
-./tradeclient cfg/tradeclient.cfg
+../examples/tradeclient/tradeclient cfg/tradeclient.cfg
