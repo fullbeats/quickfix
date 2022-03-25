@@ -29,6 +29,45 @@
 #include "quickfix/Session.h"
 #include <iostream>
 
+#include <random>
+#include <sstream>
+
+
+namespace uuid {
+    static std::random_device              rd;
+    static std::mt19937                    gen(rd());
+    static std::uniform_int_distribution<> dis(0, 15);
+    static std::uniform_int_distribution<> dis2(8, 11);
+
+    std::string generate_uuid_v4() {
+        std::stringstream ss;
+        int i;
+        ss << std::hex;
+        for (i = 0; i < 8; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        for (i = 0; i < 4; i++) {
+            ss << dis(gen);
+        }
+        ss << "-4";
+        for (i = 0; i < 3; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        ss << dis2(gen);
+        for (i = 0; i < 3; i++) {
+            ss << dis(gen);
+        }
+        ss << "-";
+        for (i = 0; i < 12; i++) {
+            ss << dis(gen);
+        };
+        return ss.str();
+    }
+}
+
+
 void Application::onLogon( const FIX::SessionID& sessionID )
 {
   std::cout << std::endl << "Logon - " << sessionID << std::endl;
@@ -622,26 +661,28 @@ char Application::queryAction()
 
 int Application::queryVersion()
 {
-  char value;
-  std::cout << std::endl
-  << "1) FIX.4.0" << std::endl
-  << "2) FIX.4.1" << std::endl
-  << "3) FIX.4.2" << std::endl
-  << "4) FIX.4.3" << std::endl
-  << "5) FIX.4.4" << std::endl
-  << "6) FIXT.1.1 (FIX.5.0)" << std::endl
-  << "BeginString: ";
-  std::cin >> value;
-  switch ( value )
-  {
-    case '1': return 40;
-    case '2': return 41;
-    case '3': return 42;
-    case '4': return 43;
-    case '5': return 44;
-    case '6': return 50;
-    default: throw std::exception();
-  }
+  // Skip Version Query --> always FIX4.4
+  // char value;
+  // std::cout << std::endl
+  // << "1) FIX.4.0" << std::endl
+  // << "2) FIX.4.1" << std::endl
+  // << "3) FIX.4.2" << std::endl
+  // << "4) FIX.4.3" << std::endl
+  // << "5) FIX.4.4" << std::endl
+  // << "6) FIXT.1.1 (FIX.5.0)" << std::endl
+  // << "BeginString: ";
+  // std::cin >> value;
+  // switch ( value )
+  // {
+  //   case '1': return 40;
+  //   case '2': return 41;
+  //   case '3': return 42;
+  //   case '4': return 43;
+  //   case '5': return 44;
+  //   case '6': return 50;
+  //   default: throw std::exception();
+  // }
+  return 44;
 }
 
 bool Application::queryConfirm( const std::string& query )
@@ -662,10 +703,12 @@ FIX::SenderCompID Application::querySenderCompID()
 
 FIX::TargetCompID Application::queryTargetCompID()
 {
-  std::string value;
-  std::cout << std::endl << "TargetCompID: ";
-  std::cin >> value;
-  return FIX::TargetCompID( value );
+  // Skip query Target
+  // std::string value;
+  // std::cout << std::endl << "TargetCompID: ";
+  // std::cin >> value;
+  // return FIX::TargetCompID( value );
+  return FIX::TargetCompID("Bittrex");
 }
 
 FIX::TargetSubID Application::queryTargetSubID()
@@ -678,9 +721,11 @@ FIX::TargetSubID Application::queryTargetSubID()
 
 FIX::ClOrdID Application::queryClOrdID()
 {
-  std::string value;
-  std::cout << std::endl << "ClOrdID: ";
-  std::cin >> value;
+  // Do not ask for ClOrdID but generate one instead
+  // std::string value;
+  // std::cout << std::endl << "ClOrdID: ";
+  // std::cin >> value;
+  std::string value = uuid::generate_uuid_v4();
   return FIX::ClOrdID( value );
 }
 
