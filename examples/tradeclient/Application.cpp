@@ -376,8 +376,9 @@ FIX44::NewOrderSingle Application::queryNewOrderSingle44()
 
 // Generate Single order by function call
 
-FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = NULL)
+FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = NULL)
 {
+  bool success;
   FIX::OrdType FixOrderType;
   if ( orderType == "MARKET") FixOrderType = FIX::OrdType( FIX::OrdType_MARKET );
   else if ( orderType == "LIMIT") FixOrderType = FIX::OrdType( FIX::OrdType_LIMIT );
@@ -416,7 +417,13 @@ FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderTyp
     newOrderSingle.set( FixStopPrice );
 
   queryHeader( newOrderSingle.getHeader() );
-  return newOrderSingle;
+  success = FIX::Session::sendToTarget(newOrderSingle);
+  if (success) {
+    return FixClOrdID;
+  }
+  else {
+    return FIX::ClOrdID("0");
+  }
 }
 
 FIX50::NewOrderSingle Application::queryNewOrderSingle50()
@@ -493,8 +500,9 @@ FIX44::OrderCancelRequest Application::queryOrderCancelRequest44()
 }
 
 // Custom Function to generate order cancel message
-FIX44::OrderCancelRequest Application::generateOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty)
+FIX::ClOrdID Application::sendOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty)
 {
+  bool success;
   FIX::OrigClOrdID FixOrigClOrdID = FIX::OrigClOrdID( origClOrdID );
   FIX::ClOrdID FixClOrdID = queryClOrdID();
   
@@ -513,7 +521,13 @@ FIX44::OrderCancelRequest Application::generateOrderCancelRequest44(std::string 
   orderCancelRequest.set( FixSymbol );
   orderCancelRequest.set( FixOrderQty );
   queryHeader( orderCancelRequest.getHeader() );
-  return orderCancelRequest;
+  success = FIX::Session::sendToTarget(orderCancelRequest);
+  if (success) {
+    return FixClOrdID;
+  }
+  else {
+    return FIX::ClOrdID("0");
+  }
 }
 
 FIX50::OrderCancelRequest Application::queryOrderCancelRequest50()
