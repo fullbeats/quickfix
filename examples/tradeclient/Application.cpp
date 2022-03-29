@@ -376,7 +376,7 @@ FIX44::NewOrderSingle Application::queryNewOrderSingle44()
 
 // Generate Single order by function call
 
-FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderType, std::string symbol, long orderQty, double price, double stopPrice = NULL)
+FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = NULL)
 {
   FIX::OrdType FixOrderType;
   if ( orderType == "MARKET") FixOrderType = FIX::OrdType( FIX::OrdType_MARKET );
@@ -395,7 +395,10 @@ FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderTyp
 
   FIX::TimeInForce FixTimeInForce = FIX::TimeInForce( FIX::TimeInForce_GOOD_TILL_CANCEL );
 
-  FIX::Side FixSide = FIX::Side( FIX::Side_BUY );
+  FIX::Side FixSide;
+  if ( side == "BUY") FixSide = FIX::Side( FIX::Side_BUY );
+  else if ( side == "SELL") FixSide = FIX::Side( FIX::Side_SELL );
+  else throw std::exception();
 
   FIX::ClOrdID FixClOrdID = queryClOrdID();
 
