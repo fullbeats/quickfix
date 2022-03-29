@@ -110,6 +110,7 @@ private:
   FIX42::NewOrderSingle queryNewOrderSingle42();
   FIX43::NewOrderSingle queryNewOrderSingle43();
   FIX44::NewOrderSingle queryNewOrderSingle44();
+  FIX44::NewOrderSingle generateNewOrderSingle44(std::string orderType, std::string symbol, long orderQty, double price, double stopPrice = NULL);
   FIX50::NewOrderSingle queryNewOrderSingle50();
   FIX40::OrderCancelRequest queryOrderCancelRequest40();
   FIX41::OrderCancelRequest queryOrderCancelRequest41();

@@ -374,6 +374,48 @@ FIX44::NewOrderSingle Application::queryNewOrderSingle44()
   return newOrderSingle;
 }
 
+// Generate Single order by function call
+
+FIX44::NewOrderSingle Application::generateNewOrderSingle44(std::string orderType, std::string symbol, long orderQty, double price, double stopPrice = NULL)
+{
+  FIX::OrdType FixOrderType;
+  if ( orderType == "MARKET") FixOrderType = FIX::OrdType( FIX::OrdType_MARKET );
+  else if ( orderType == "LIMIT") FixOrderType = FIX::OrdType( FIX::OrdType_LIMIT );
+  else if ( orderType == "STOP") FixOrderType = FIX::OrdType( FIX::OrdType_STOP );
+  else if ( orderType == "STOP_LIMIT") FixOrderType = FIX::OrdType( FIX::OrdType_STOP_LIMIT );
+  else throw std::exception();
+
+  FIX::Symbol FixSymbol = FIX::Symbol(symbol);
+
+  FIX::OrderQty FixOrderQty = FIX::OrderQty(orderQty);
+
+  FIX::Price FixPrice = FIX::Price( price );
+
+  FIX::StopPx FixStopPrice = FIX::StopPx( price );
+
+  FIX::TimeInForce FixTimeInForce = FIX::TimeInForce( FIX::TimeInForce_GOOD_TILL_CANCEL );
+
+  FIX::Side FixSide = FIX::Side( FIX::Side_BUY );
+
+  FIX::ClOrdID FixClOrdID = queryClOrdID();
+
+  FIX44::NewOrderSingle newOrderSingle(
+    FixClOrdID, FixSide,
+    FIX::TransactTime(), FixOrderType );
+
+  // newOrderSingle.set( FIX::HandlInst('1') );
+  newOrderSingle.set( FixSymbol );
+  newOrderSingle.set( FixOrderQty );
+  newOrderSingle.set( FixTimeInForce );
+  if ( FixOrderType == FIX::OrdType_LIMIT || FixOrderType == FIX::OrdType_STOP_LIMIT )
+    newOrderSingle.set( FixPrice );
+  if ( FixOrderType == FIX::OrdType_STOP || FixOrderType == FIX::OrdType_STOP_LIMIT )
+    newOrderSingle.set( FixStopPrice );
+
+  queryHeader( newOrderSingle.getHeader() );
+  return newOrderSingle;
+}
+
 FIX50::NewOrderSingle Application::queryNewOrderSingle50()
 {
   FIX::OrdType ordType;
