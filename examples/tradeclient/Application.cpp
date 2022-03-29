@@ -492,6 +492,30 @@ FIX44::OrderCancelRequest Application::queryOrderCancelRequest44()
   return orderCancelRequest;
 }
 
+// Custom Function to generate order cancel message
+FIX44::OrderCancelRequest Application::generateOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty)
+{
+  FIX::OrigClOrdID FixOrigClOrdID = FIX::OrigClOrdID( origClOrdID );
+  FIX::ClOrdID FixClOrdID = queryClOrdID();
+  
+  FIX::Side FixSide;
+  if ( side == "BUY") FixSide = FIX::Side( FIX::Side_BUY );
+  else if ( side == "SELL") FixSide = FIX::Side( FIX::Side_SELL );
+  else throw std::exception();
+
+  FIX::Symbol FixSymbol = FIX::Symbol(symbol);
+
+  FIX::OrderQty FixOrderQty = FIX::OrderQty(orderQty);
+  
+  FIX44::OrderCancelRequest orderCancelRequest( FixOrigClOrdID,
+      FixClOrdID, FixSide, FIX::TransactTime() );
+
+  orderCancelRequest.set( FixSymbol );
+  orderCancelRequest.set( FixOrderQty );
+  queryHeader( orderCancelRequest.getHeader() );
+  return orderCancelRequest;
+}
+
 FIX50::OrderCancelRequest Application::queryOrderCancelRequest50()
 {
   FIX50::OrderCancelRequest orderCancelRequest( queryOrigClOrdID(),

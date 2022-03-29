@@ -117,6 +117,7 @@ private:
   FIX42::OrderCancelRequest queryOrderCancelRequest42();
   FIX43::OrderCancelRequest queryOrderCancelRequest43();
   FIX44::OrderCancelRequest queryOrderCancelRequest44();
+  FIX44::OrderCancelRequest generateOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty);
   FIX50::OrderCancelRequest queryOrderCancelRequest50();
   FIX40::OrderCancelReplaceRequest queryCancelReplaceRequest40();
   FIX41::OrderCancelReplaceRequest queryCancelReplaceRequest41();
