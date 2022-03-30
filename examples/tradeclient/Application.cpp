@@ -32,6 +32,8 @@
 #include <random>
 #include <sstream>
 
+#include <chrono>
+#include <thread>
 
 namespace uuid {
     static std::random_device              rd;
@@ -127,28 +129,35 @@ void Application::onMessage
 
 void Application::run()
 {
-  while ( true )
-  {
-    try
-    {
-      char action = queryAction();
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  FIX::ClOrdID clOrdId_place = sendNewOrderSingle44("LIMIT", "WAVES-BTC", "SELL", 1.0, 30000000);
+  std::cout << clOrdId_place;
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  FIX::ClOrdID clOrdId_cancel = sendOrderCancelRequest44(clOrdId_place.getValue(), "WAVES-BTC", "SELL", 1.0);
+  std::cout << clOrdId_cancel;
 
-      if ( action == '1' )
-        queryEnterOrder();
-      else if ( action == '2' )
-        queryCancelOrder();
-      else if ( action == '3' )
-        queryReplaceOrder();
-      else if ( action == '4' )
-        queryMarketDataRequest();
-      else if ( action == '5' )
-        break;
-    }
-    catch ( std::exception & e )
-    {
-      std::cout << "Message Not Sent: " << e.what();
-    }
-  }
+  // while ( true )
+  // {
+  //   try
+  //   {
+  //     char action = queryAction();
+
+  //     if ( action == '1' )
+  //       queryEnterOrder();
+  //     else if ( action == '2' )
+  //       queryCancelOrder();
+  //     else if ( action == '3' )
+  //       queryReplaceOrder();
+  //     else if ( action == '4' )
+  //       queryMarketDataRequest();
+  //     else if ( action == '5' )
+  //       break;
+  //   }
+  //   catch ( std::exception & e )
+  //   {
+  //     std::cout << "Message Not Sent: " << e.what();
+  //   }
+  // }
 }
 
 void Application::queryEnterOrder()
@@ -718,9 +727,8 @@ void Application::queryHeader( FIX::Header& header )
 {
   header.setField( querySenderCompID() );
   header.setField( queryTargetCompID() );
-
-  if ( queryConfirm( "Use a TargetSubID" ) )
-    header.setField( queryTargetSubID() );
+  // if ( queryConfirm( "Use a TargetSubID" ) )
+  //   header.setField( queryTargetSubID() );
 }
 
 char Application::queryAction()
@@ -778,10 +786,11 @@ bool Application::queryConfirm( const std::string& query )
 
 FIX::SenderCompID Application::querySenderCompID()
 {
-  std::string value;
-  std::cout << std::endl << "SenderCompID: ";
-  std::cin >> value;
-  return FIX::SenderCompID( value );
+  // Skip query Sender
+  // std::string value;
+  // std::cout << std::endl << "SenderCompID: ";
+  // std::cin >> value;
+  return FIX::SenderCompID( "SENDER_COMP_ID_TODO" );
 }
 
 FIX::TargetCompID Application::queryTargetCompID()
@@ -791,7 +800,7 @@ FIX::TargetCompID Application::queryTargetCompID()
   // std::cout << std::endl << "TargetCompID: ";
   // std::cin >> value;
   // return FIX::TargetCompID( value );
-  return FIX::TargetCompID("Bittrex");
+  return FIX::TargetCompID( "Bittrex" );
 }
 
 FIX::TargetSubID Application::queryTargetSubID()
