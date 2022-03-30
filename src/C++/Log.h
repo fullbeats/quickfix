@@ -134,10 +134,12 @@ public:
     if ( !m_incoming ) return ;
     Locker l( s_mutex );
     m_time.setCurrent();
+    std::string s = value;
+    std::replace( s.begin(), s.end(), '\001', '|');
     std::cout << "<" << UtcTimeStampConvertor::convert(m_time, 9)
               << ", " << m_prefix
               << ", " << "incoming>" << std::endl
-              << "  (" << value << ")" << std::endl;
+              << "  (" << s << ")" << std::endl;
   }
 
   void onOutgoing( const std::string& value )
