@@ -35,6 +35,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 #include "../../src/getopt-repl.h"
 
@@ -72,9 +74,17 @@ int main( int argc, char** argv )
     else
 #endif
     initiator = new FIX::SocketInitiator( application, storeFactory, settings, logFactory );
-
+    std::cout << "let's start!";
     initiator->start();
-    application.run();
+
+    // application.run();
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    FIX::ClOrdID clOrdId_place = application.sendNewOrderSingle44("LIMIT", "WAVES-BTC", "SELL", 1.0, 30000000000);
+    std::cout << clOrdId_place;
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    FIX::ClOrdID clOrdId_cancel = application.sendOrderCancelRequest44(clOrdId_place.getValue(), "WAVES-BTC", "SELL", 1.0);
+    std::cout << clOrdId_cancel;
+
     initiator->stop();
     delete initiator;
     std::cout << "Run finished.";
