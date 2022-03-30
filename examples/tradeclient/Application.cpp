@@ -376,7 +376,7 @@ FIX44::NewOrderSingle Application::queryNewOrderSingle44()
 
 // Generate Single order by function call
 
-FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = NULL)
+FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice)
 {
   bool success;
   FIX::OrdType FixOrderType;

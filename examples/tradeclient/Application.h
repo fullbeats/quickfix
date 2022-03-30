@@ -74,6 +74,8 @@ class Application :
 {
 public:
   void run();
+  FIX::ClOrdID sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = -1);
+  FIX::ClOrdID sendOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty);
 
 private:
   void onCreate( const FIX::SessionID& ) {}
@@ -110,14 +112,12 @@ private:
   FIX42::NewOrderSingle queryNewOrderSingle42();
   FIX43::NewOrderSingle queryNewOrderSingle43();
   FIX44::NewOrderSingle queryNewOrderSingle44();
-  FIX::ClOrdID sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = NULL);
   FIX50::NewOrderSingle queryNewOrderSingle50();
   FIX40::OrderCancelRequest queryOrderCancelRequest40();
   FIX41::OrderCancelRequest queryOrderCancelRequest41();
   FIX42::OrderCancelRequest queryOrderCancelRequest42();
   FIX43::OrderCancelRequest queryOrderCancelRequest43();
   FIX44::OrderCancelRequest queryOrderCancelRequest44();
-  FIX::ClOrdID sendOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty);
   FIX50::OrderCancelRequest queryOrderCancelRequest50();
   FIX40::OrderCancelReplaceRequest queryCancelReplaceRequest40();
   FIX41::OrderCancelReplaceRequest queryCancelReplaceRequest41();
