@@ -89,8 +89,15 @@ void startSubscriber()
             rc = zmq_socket.recv(&msg) && rc;
             if(rc > 0) // Do no print trace when recv return from timeout
             {
-                std::cout << "topic:\"" << std::string(static_cast<char*>(topic.data()), topic.size()) << "\"" << std::endl;
-                std::cout << "msg:\"" << std::string(static_cast<char*>(msg.data()), msg.size()) << "\"" << std::endl;
+                std::cout << "topic: \"" << std::string(static_cast<char*>(topic.data()), topic.size()) << "\"" << std::endl;
+                std::cout << "msg: \"" << std::string(static_cast<char*>(msg.data()), msg.size()) << "\"" << std::endl;
+                // start parsing msg as json
+                auto data = json::parse(std::string(static_cast<char*>(msg.data()), msg.size()));
+                // explicit conversion to string
+                std::cout << "updateid: " << data["update"]["id"] << std::endl;
+                std::string s = data.dump(); 
+
+
             }
         }
         else if (items [1].revents & ZMQ_POLLIN)
