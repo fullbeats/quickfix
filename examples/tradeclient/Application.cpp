@@ -84,7 +84,7 @@ void Application::fromApp( const FIX::Message& message, const FIX::SessionID& se
 EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType )
 {
   crack( message, sessionID );
-  std::cout << std::endl << "IN: " << message << std::endl;
+  // std::cout << std::endl << "IN: " << message << std::endl;
 }
 
 void Application::toApp( FIX::Message& message, const FIX::SessionID& sessionID )
@@ -98,8 +98,8 @@ EXCEPT( FIX::DoNotSend )
   }
   catch ( FIX::FieldNotFound& ) {}
 
-  std::cout << std::endl
-  << "OUT: " << message << std::endl;
+  // std::cout << std::endl
+  // << "OUT: " << message << std::endl;
 }
 
 void Application::onMessage
@@ -129,12 +129,17 @@ void Application::onMessage
 
 void Application::run()
 {
+
+  // Required for Placing Orders: Symbol, Side, OrderQty, OrdType{"LIMIT", "MARKET"}, Price
+  // Required for Canceling: OrigClOrdID
   std::this_thread::sleep_for(std::chrono::milliseconds(3000));
   FIX::ClOrdID clOrdId_place = sendNewOrderSingle44("LIMIT", "WAVES-BTC", "SELL", 1.0, 30000000);
-  std::cout << clOrdId_place;
+  // std::cout << clOrdId_place;
   std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-  FIX::ClOrdID clOrdId_cancel = sendOrderCancelRequest44(clOrdId_place.getValue(), "WAVES-BTC", "SELL", 1.0);
-  std::cout << clOrdId_cancel;
+  FIX::ClOrdID clOrdId_cancel = sendOrderCancelRequest44(clOrdId_place.getValue(), "ANY-THING", "SELL", 0.0);
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  // FIX::ClOrdID clOrdId_cancel2 = sendOrderCancelRequest44("fc9bf4a3-7a2a-4673-9e64-7b4eb9562a11", "WAVES-BTC", "SELL", 0.0);
+  // std::cout << clOrdId_cancel;
 
   // while ( true )
   // {
@@ -385,7 +390,7 @@ FIX44::NewOrderSingle Application::queryNewOrderSingle44()
 
 // Generate Single order by function call
 
-FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice)
+FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice, std::string clOrdId)
 {
   bool success;
   FIX::OrdType FixOrderType;
@@ -410,7 +415,15 @@ FIX::ClOrdID Application::sendNewOrderSingle44(std::string orderType, std::strin
   else if ( side == "SELL") FixSide = FIX::Side( FIX::Side_SELL );
   else throw std::exception();
 
-  FIX::ClOrdID FixClOrdID = queryClOrdID();
+  // generate own ClOrdId if no value is passed for clOrdId
+  FIX::ClOrdID FixClOrdID;
+  if (clOrdId.empty()) {
+    FixClOrdID = queryClOrdID();
+  }
+  else {
+    FixClOrdID = FIX::ClOrdID(clOrdId);
+  }
+  
 
   FIX44::NewOrderSingle newOrderSingle(
     FixClOrdID, FixSide,

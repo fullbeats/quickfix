@@ -74,7 +74,7 @@ class Application :
 {
 public:
   void run();
-  FIX::ClOrdID sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = -1);
+  FIX::ClOrdID sendNewOrderSingle44(std::string orderType, std::string symbol, std::string side, long orderQty, double price, double stopPrice = -1, std::string clOrdId = std::string());
   FIX::ClOrdID sendOrderCancelRequest44(std::string origClOrdID, std::string symbol, std::string side, long orderQty);
 
 private:
